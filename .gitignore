@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm/
+
+# Build-Artefakte
+dist/
+build/
+*.js
+*.js.map
+*.d.ts
+
+# Editor / IDE-spezifische Dateien
+.vscode/        # VS Code Konfigurationsdateien (optional, falls du sie nicht teilen möchtest)
+.idea/          # IntelliJ/WebStorm Konfigurationsdateien
+*.swp           # Vim swap files
+*.bak           # Backup files
+*.log
+
+# Betriebssystem-spezifische Dateien
+.DS_Store       # macOS
+Thumbs.db       # Windows
+
