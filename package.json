@@ -1,11 +1,14 @@
 {
   "name": "immich-carddav-sync",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": "./dist/index.js",
   "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "build": "vite build",
+    "test": "vitest",
+    "test:cov": "vitest --coverage",
+    "check": "tsc --noEmit",
+    "dev": "ts-node --esm src/index.ts"
   },
   "bin": {
     "immich-carddav-sync": "./dist/index.js"
@@ -17,9 +20,12 @@
   "devDependencies": {
     "@types/node": "^24.0.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
+    "@immich/sdk": "^1.135.3",
     "commander": "^14.0.0"
   }
 }

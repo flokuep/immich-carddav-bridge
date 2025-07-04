@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2022", // Oder eine andere moderne Version, z.B. "ES2020"
-    "module": "CommonJS",
-    "outDir": "./dist", // Hier werden die kompilierten JS-Dateien gespeichert
-    "rootDir": "./src", // Hier liegen deine TypeScript-Quelldateien
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
-    "esModuleInterop": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "target": "es2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "esModuleInterop": true
   },
-  "include": ["src/**/*.ts"], // Stelle sicher, dass der Compiler deine src-Dateien findet
-  "exclude": ["node_modules"]
+  "exclude": ["dist", "node_modules"]
 }
