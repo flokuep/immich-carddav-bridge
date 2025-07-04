@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command, Option } from "commander";
-import sync from "./sync";
+import sync from "./commands/sync";
 import { version } from "../package.json";
 
 const program = new Command();
@@ -38,6 +38,7 @@ program
     "Read people and match contacts but without transferring pictures"
   )
   .action((options) => {
-    sync();
+    sync(program.opts());
   });
+
 program.parse(process.argv);
