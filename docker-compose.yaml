@@ -1,0 +1,6 @@
+services:
+  immich-carddav-bridge:
+    container_name: immich-carddav-bridge
+    build: .
+    env_file: ".env"
+    restart: unless-stopped
