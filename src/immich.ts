@@ -1,10 +1,9 @@
-import { getAllPeople, init } from "@immich/sdk";
-import { ImmichPerson } from "./utils";
+import { getAllPeople, getPersonThumbnail, init } from "@immich/sdk";
+import { ImmichPerson } from "./types";
 
 const API_KEY = process.env.IMMICH_API_KEY; //
 
-export default async function getImmichPeople(baseUrl: string, apiKey: string) {
-  console.log(baseUrl);
+export async function getImmichPeople(baseUrl: string, apiKey: string) {
   init({ baseUrl, apiKey });
 
   const immichPeople = [] as ImmichPerson[];
@@ -22,5 +21,24 @@ export default async function getImmichPeople(baseUrl: string, apiKey: string) {
       });
   } while (currentPeoplePage.hasNextPage);
 
-  console.log({ immichPeople });
+  return immichPeople;
+}
+
+export async function getPersonImage(
+  baseUrl: string,
+  apiKey: string,
+  ids: string[]
+) {
+  init({ baseUrl, apiKey });
+
+  const thumbnails = {} as { [key: string]: Blob };
+
+  await Promise.all(
+    ids.map(async (id) => {
+      const blob = await getPersonThumbnail({ id });
+      thumbnails[id] = blob;
+    })
+  );
+
+  return thumbnails;
 }

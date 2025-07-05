@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Command, Option } from "commander";
+import { Command } from "commander";
 import sync from "./commands/sync";
 import { version } from "../package.json";
 
@@ -11,23 +11,35 @@ program
     "Syncs preview pictures of recognized people from immich to pictures of CardDAV contacts."
   )
   .version(version)
-  .addOption(
-    new Option("--immich-url [url]", "Immich server URL").env(
-      "IMMICH_SERVER_URL"
-    )
+  .requiredOption(
+    "--immich-url [url]",
+    "Immich server URL",
+    process.env.IMMICH_URL
   )
-  .addOption(
-    new Option("--immich-key [key]", "Immich API key").env("IMMICH_API_KEY")
+  .requiredOption(
+    "--immich-key [key]",
+    "Immich API key",
+    process.env.IMMICH_KEY
   )
-  .addOption(
-    new Option("--carddav-url [url]", "CardDAV server URL").env(
-      "CARDDAV_INSTANCE_URL"
-    )
+  .requiredOption(
+    "--carddav-url [url]",
+    "CardDAV server URL",
+    process.env.CARDDAV_URL
   )
-  .addOption(
-    new Option("--carddav-username [key]", "CardDAV user name").env(
-      "CARDDAV_USER_NAME"
-    )
+  .requiredOption(
+    "--carddav-path [path]",
+    "CardDAV addressbook path",
+    process.env.CARDDAV_PATH
+  )
+  .requiredOption(
+    "--carddav-username [username]",
+    "CardDAV username",
+    process.env.CARDDAV_USERNAME
+  )
+  .requiredOption(
+    "--carddav-password [password]",
+    "Password or token of CardDAV user",
+    process.env.CARDDAV_PASSWORD
   );
 
 program

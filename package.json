@@ -7,6 +7,7 @@
     "build": "vite build",
     "test": "vitest",
     "test:cov": "vitest --coverage",
+    "try": "node --env-file='.env' dist/index.js sync",
     "check": "tsc --noEmit",
     "dev": "ts-node --esm src/index.ts"
   },
@@ -19,13 +20,18 @@
   "description": "",
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^26.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@immich/sdk": "^1.135.3",
-    "commander": "^14.0.0"
+    "commander": "^14.0.0",
+    "tsdav": "^2.1.5",
+    "vcard4-ts": "^0.4.1"
   }
 }
