@@ -6,6 +6,7 @@ import {
   fetchAndParseVCards,
   getPrimaryCardDavAddressBook,
 } from "../../src/carddav/fetchContacts";
+import consola from "consola";
 
 const mockFetchAddressBooks = vi.fn();
 const mockFetchVCards = vi.fn();
@@ -57,9 +58,9 @@ describe("CardDAV Client Operations", () => {
       immichKey: "testkey",
     };
 
-    consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(consola, "warn").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(consola, "error").mockImplementation(() => {});
+    consoleLogSpy = vi.spyOn(consola, "log").mockImplementation(() => {});
   });
 
   afterEach(() => {

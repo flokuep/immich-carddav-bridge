@@ -1,6 +1,7 @@
 import { DAVAddressBook, DAVClient, DAVObject } from "tsdav";
 import { BaseOptions, CardDavContact } from "../types";
 import { parseVCards } from "vcard4-ts";
+import consola from "consola";
 
 /**
  * Fetches the primary CardDAV address book for the given options.
@@ -31,7 +32,7 @@ export async function getPrimaryCardDavAddressBook(
   }
 
   const targetAddressBook = addressBooks[0];
-  console.log(`Connecting to CardDAV address book: ${targetAddressBook.url}`);
+  consola.info(`Connecting to CardDAV address book: ${targetAddressBook.url}`);
   return targetAddressBook;
 }
 
@@ -57,7 +58,7 @@ export async function fetchAndParseVCards(
       }
     }
   } catch (error) {
-    console.error("Error fetching or parsing vCards:", error);
+    consola.error("Error fetching or parsing vCards:", error);
     throw new Error(`Failed to fetch or parse vCards: ${error}`);
   }
   return fetchedContacts;
@@ -73,7 +74,7 @@ function processDavObjectToCardDavContact(
   davObject: DAVObject
 ): CardDavContact | null {
   if (!davObject.data) {
-    console.warn(
+    consola.warn(
       `DAVObject at URL ${davObject.url} contains no data. Skipping.`
     );
     return null;
@@ -82,7 +83,7 @@ function processDavObjectToCardDavContact(
   const parsedVCards = parseVCards(davObject.data).vCards;
 
   if (!parsedVCards || parsedVCards.length === 0) {
-    console.warn(
+    consola.warn(
       `No valid vCards found in DAVObject from ${davObject.url}. Skipping.`
     );
     return null;
@@ -99,7 +100,7 @@ function processDavObjectToCardDavContact(
       name: contactName,
     };
   } else {
-    console.warn(
+    consola.warn(
       `vCard from ${davObject.url} has no FN (Full Name) field. Skipping.`
     );
     return null;

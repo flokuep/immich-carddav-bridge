@@ -1,3 +1,4 @@
+import consola from "consola";
 import { CardDavContact, ImmichPerson, MatchedContact } from "../types";
 
 /**
@@ -19,6 +20,7 @@ export default function matchPeopleToContacts(
   immichPeople: ImmichPerson[],
   cardDavContacts: CardDavContact[]
 ): MatchedContact[] {
+  consola.start("Matching immich people to carddav contacts");
   // Sort both lists by name to enable efficient two-pointer matching
   const sortedImmichPeople = sortItemsByName(immichPeople);
   const sortedCardDavContacts = sortItemsByName(cardDavContacts);
@@ -55,6 +57,10 @@ export default function matchPeopleToContacts(
       cardDavPointer++;
     }
   }
+
+  consola.success(
+    `Matched ${matchedPairs.length} immich people to carddav contacts.`
+  );
 
   return matchedPairs;
 }
