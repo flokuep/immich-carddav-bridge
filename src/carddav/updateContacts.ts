@@ -1,6 +1,7 @@
 import { DAVClient } from "tsdav";
 import { MatchedContact } from "../types";
 import { foldLine } from "../utils";
+import consola from "consola";
 
 /**
  * Processes a single contact update: retrieves thumbnail, updates vCard data, and uploads to CardDAV.
@@ -18,7 +19,7 @@ export async function processSingleContactUpdate(
   const blob = thumbnails[immich.id];
 
   if (!blob) {
-    console.warn(
+    consola.warn(
       `No thumbnail found for Immich person "${immich.name}" (ID: ${immich.id}). Skipping update.`
     );
     return;
@@ -40,11 +41,8 @@ export async function processSingleContactUpdate(
     await client.updateVCard({
       vCard: newVCard,
     });
-    console.log(
-      `Successfully updated thumbnail for ${immich.name} (${immich.id}).`
-    );
   } catch (error) {
-    console.error(
+    consola.error(
       `Error updating thumbnail for ${immich.name} (${immich.id}):`,
       error
     );
@@ -111,10 +109,12 @@ function updateVCardPhotoField(
   } else {
     const endVCardIndex = cardDavLines.indexOf("END:VCARD");
     if (endVCardIndex !== -1) {
-      console.log(`${contactName}: No existing photo found. Adding new photo.`);
+      consola.info(
+        `${contactName}: No existing photo found. Adding new photo.`
+      );
       cardDavLines.splice(endVCardIndex, 0, ...foldedPhoto.split("\r\n"));
     } else {
-      console.warn(
+      consola.warn(
         `Warning: "END:VCARD" not found for ${contactName}. Appending photo at the end.`
       );
       cardDavLines.push(...foldedPhoto.split("\r\n"));

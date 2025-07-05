@@ -1,5 +1,6 @@
 import { DAVClient } from "tsdav";
 import { BaseOptions } from "../types";
+import consola from "consola";
 
 /**
  * Creates and logs into a DAVClient instance.
@@ -17,10 +18,10 @@ export async function createDavClient(
   });
   try {
     await client.login();
-    console.log("DAVClient successfully logged in.");
+    consola.info("DAVClient successfully logged in.");
     return client;
   } catch (error) {
-    console.error("Error during DAVClient login:", error);
+    consola.error("Error during DAVClient login:", error);
     throw new Error(`Failed to log in to DAVClient: ${error}`);
   }
 }

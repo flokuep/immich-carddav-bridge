@@ -1,5 +1,6 @@
 import { getAllPeople, getPersonThumbnail, init } from "@immich/sdk";
 import { BaseOptions, ImmichPerson } from "../types";
+import consola from "consola";
 
 let isSdkInitialized = false;
 
@@ -14,6 +15,9 @@ let isSdkInitialized = false;
 export async function getImmichPeople(
   options: BaseOptions
 ): Promise<ImmichPerson[]> {
+  consola.start(
+    "Getting people from immich server. Hidden people are not fetched, expect less people processed than total people."
+  );
   initializeImmichSdk(options.immichUrl, options.immichKey);
 
   const allImmichPeople: ImmichPerson[] = [];
@@ -23,7 +27,7 @@ export async function getImmichPeople(
   try {
     do {
       currentPeoplePage = await getAllPeople({ withHidden: false });
-      console.log(
+      consola.info(
         `Fetched Immich people page ${currentPageNumber} with ${currentPeoplePage.people.length}/${currentPeoplePage.total} people.`
       );
 
@@ -39,12 +43,12 @@ export async function getImmichPeople(
       currentPageNumber++;
     } while (currentPeoplePage.hasNextPage);
 
-    console.log(
+    consola.success(
       `Successfully fetched ${allImmichPeople.length} Immich people.`
     );
     return allImmichPeople;
   } catch (error) {
-    console.error("Error fetching Immich people:", error);
+    consola.error("Error fetching Immich people:", error);
     throw new Error(`Failed to fetch Immich people: ${error}`);
   }
 }
@@ -59,10 +63,11 @@ export async function getImmichPeople(
  * If a thumbnail fetch fails for an ID, that ID might be missing from the returned object.
  * @throws {Error} If any parallel API call for a thumbnail fails critically.
  */
-export async function getPersonImage(
+export async function getPersonImages(
   options: BaseOptions,
   ids: string[]
 ): Promise<{ [key: string]: Blob }> {
+  consola.start("Getting people previews from immich server");
   initializeImmichSdk(options.immichUrl, options.immichKey);
 
   const thumbnails: { [key: string]: Blob } = {};
@@ -71,13 +76,9 @@ export async function getPersonImage(
     fetchPromises.push(
       (async () => {
         try {
-          const blob = await getPersonThumbnail({ id });
-          thumbnails[id] = blob;
-          console.log(
-            `Successfully fetched thumbnail for Immich person ID: ${id}`
-          );
+          thumbnails[id] = await getPersonThumbnail({ id });
         } catch (error) {
-          console.error(
+          consola.error(
             `Error fetching thumbnail for Immich person ID: ${id}:`,
             error
           );
@@ -88,7 +89,7 @@ export async function getPersonImage(
 
   await Promise.allSettled(fetchPromises);
 
-  console.log(
+  consola.success(
     `Attempted to fetch ${ids.length} thumbnails. Fetched ${
       Object.keys(thumbnails).length
     } successfully.`
@@ -109,12 +110,12 @@ export function initializeImmichSdk(baseUrl: string, apiKey: string): void {
     throw new Error("Immich base URL cannot be empty for SDK initialization.");
   }
   if (!apiKey) {
-    console.warn("Immich API Key is not provided. API calls might fail.");
+    consola.warn("Immich API Key is not provided. API calls might fail.");
   }
 
   if (!isSdkInitialized) {
     init({ baseUrl, apiKey });
     isSdkInitialized = true;
-    console.log("Immich SDK initialized successfully.");
+    consola.info("Immich SDK initialized successfully.");
   }
 }

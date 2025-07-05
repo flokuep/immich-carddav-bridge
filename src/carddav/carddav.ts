@@ -5,6 +5,7 @@ import {
   getPrimaryCardDavAddressBook,
 } from "./fetchContacts";
 import { processSingleContactUpdate } from "./updateContacts";
+import { consola } from "consola";
 
 /**
  * Fetches contacts from a CardDAV server.
@@ -15,11 +16,12 @@ import { processSingleContactUpdate } from "./updateContacts";
 export async function getCardDavContacts(
   options: BaseOptions
 ): Promise<CardDavContact[]> {
+  consola.start("Getting contacts from carddav server");
   const client = await createDavClient(options);
   const targetAddressBook = await getPrimaryCardDavAddressBook(client, options);
   const contacts = await fetchAndParseVCards(client, targetAddressBook);
 
-  console.log(`Successfully loaded ${contacts.length} contacts.`);
+  consola.success(`Successfully loaded ${contacts.length} contacts.`);
   return contacts;
 }
 
@@ -35,6 +37,8 @@ export async function updateContacts(
   matchings: MatchedContact[],
   thumbnails: { [key: string]: Blob }
 ): Promise<void> {
+  consola.start("Updating contacts to carddav server");
+
   const client = await createDavClient(options);
   const updatePromises: Promise<void>[] = [];
 
@@ -45,5 +49,5 @@ export async function updateContacts(
   }
 
   await Promise.allSettled(updatePromises);
-  console.log("All contact updates have been completed.");
+  consola.success("All contact updates have been completed.");
 }
