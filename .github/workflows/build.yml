@@ -58,7 +58,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             # Tags for published releases (e.g., 'v1.0.0', 'latest')
-            type=raw,value=${{ steps.get_version.outputs.version }},enable=${{ github.event_name == 'workflow_run' }}
+            type=raw,value=${{ steps.get_version.outputs.PACKAGE_VERSION }},enable=${{ github.event_name == 'workflow_run' }}
             type=raw,value=latest,enable=${{ github.event_name == 'workflow_run' }}
             # Nightly tags for pushes to the 'main' branch
             type=raw,value=nightly,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
