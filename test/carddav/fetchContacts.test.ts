@@ -60,7 +60,7 @@ describe("CardDAV Client Operations", () => {
 
     consoleWarnSpy = vi.spyOn(consola, "warn").mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(consola, "error").mockImplementation(() => {});
-    consoleLogSpy = vi.spyOn(consola, "log").mockImplementation(() => {});
+    consoleLogSpy = vi.spyOn(consola, "info").mockImplementation(() => {});
   });
 
   afterEach(() => {
