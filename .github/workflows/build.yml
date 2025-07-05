@@ -51,19 +51,24 @@ jobs:
           version=$(jq -r '.version' package.json)
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Generate docker image tags
+      - name: Generate Docker image tags
         id: metadata
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            # Tags for published releases (e.g., 'v1.0.0', 'latest')
             type=raw,value=${{ steps.package-version.outputs.version }},enable=${{ github.event_name == 'release' }}
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            # Nightly tags for pushes to the 'main' branch
+            type=raw,value=nightly,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+            # 'nightly-YYYYMMDD' tag provides a unique, date-stamped nightly build
+            type=sha,prefix=nightly-,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           file: Dockerfile
-          push: ${{ github.event_name == 'release' }}
+          push: ${{ github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
