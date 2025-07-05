@@ -50,7 +50,7 @@ program
     "Read people and match contacts but without transferring pictures"
   )
   .action((options) => {
-    sync(program.opts());
+    sync(program.opts(), options.dryRun);
   });
 
 program.parse(process.argv);
