@@ -2,13 +2,9 @@
 
 A lightweight bridge to synchronize data between your **Immich** instance and a **CardDAV** server. This project aims to enhance your self-hosted CardDAV contacts by adding preview pictures from your self-hosted Immich instance.
 
----
-
 ## ✨ Features
 
 - Synchronizes Immich people's preview images to CardDAV contacts.
-
----
 
 ## 🚀 Getting Started
 
@@ -47,7 +43,7 @@ Please ensure that `immich-carddav-bridge` can reach both your Immich instance a
     ```yaml
     immich-carddav-bridge:
       container_name: immich-carddav-bridge
-      image: ghcr.io/flokuep/immich-carddav-bridge:nightly
+      image: ghcr.io/flokuep/immich-carddav-bridge:latest
       restart: unless-stopped
       depends_on:
         - immich-server # Ensure this matches your Immich service name
@@ -59,8 +55,6 @@ Please ensure that `immich-carddav-bridge` can reach both your Immich instance a
     ```
     This will start the bridge in the background. Check the logs with `docker-compose logs -f immich-carddav-bridge` to monitor its activity.
 
----
-
 ## 🤝 Compatibility
 
 This bridge has been tested with the following CardDAV servers. Your `CARDDAV_URL` and `CARDDAV_PATH` settings will vary depending on your server configuration.
@@ -68,8 +62,6 @@ This bridge has been tested with the following CardDAV servers. Your `CARDDAV_UR
 | CardDAV Server | `CARDDAV_URL` Example                        | `CARDDAV_PATH` Example                        | Notes                                            |
 | :------------- | :------------------------------------------- | :-------------------------------------------- | :----------------------------------------------- |
 | **Nextcloud**  | `https://your-nextcloud.com/remote.php/dav/` | `/addressbooks/users/your_username/contacts/` | Ensure your user has access to the address book. |
-
----
 
 ## 🧑‍💻 Development
 
