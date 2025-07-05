@@ -45,11 +45,9 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get package version
-        id: package-version
-        run: |
-          version=$(jq -r '.version' package.json)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Get current version from package.json
+        id: get_version
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Generate Docker image tags
         id: metadata
@@ -58,7 +56,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             # Tags for published releases (e.g., 'v1.0.0', 'latest')
-            type=raw,value=${{ steps.package-version.outputs.version }},enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ steps.get_version.outputs.version }},enable=${{ github.event_name == 'release' }}
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
             # Nightly tags for pushes to the 'main' branch
             type=raw,value=nightly,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
