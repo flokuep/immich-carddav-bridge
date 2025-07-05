@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  workflow_dispatch: # Ermöglicht die manuelle Ausführung der Action über die GitHub UI
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest # Das Betriebssystem, auf dem der Job ausgeführt wird
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get package version
+        id: package-version
+        run: |
+          version=$(jq -r '.version' package.json)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Get last Git tag
+        id: get_last_tag
+        run: echo "LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")" >> $GITHUB_OUTPUT
+
+      - name: Create Git Tag
+        run: |
+          TAG_NAME="v${{ steps.package-version.outputs.PACKAGE_VERSION }}"
+          git config user.name "github-actions[bot]" # Konfiguriert den Git-Benutzer
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG_NAME" # Erstellt den lokalen Tag
+          git push origin "$TAG_NAME" # Pusht den Tag zum Remote-Repository
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.package-version.outputs.PACKAGE_VERSION }}"
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          make_latest: true
