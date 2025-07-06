@@ -15,8 +15,14 @@ export default async function sync(
 ) {
   try {
     const [immichPeople, cardDavContacts] = await Promise.all([
-      getImmichPeople(options),
-      getCardDavContacts(options),
+      getImmichPeople(options.immichUrl, options.immichKey),
+      getCardDavContacts(
+        options.carddavUrl,
+        options.carddavUsername,
+        options.carddavPassword,
+        options.carddavPathTemplate,
+        options.carddavAddressbooks
+      ),
     ]);
     const matchedEntries = matchPeopleToContacts(immichPeople, cardDavContacts);
     if (dryRun) {
@@ -25,9 +31,19 @@ export default async function sync(
     }
 
     const immichPersonIds = matchedEntries.map((entry) => entry.immich.id);
-    const personThumbnails = await getPersonImages(options, immichPersonIds);
+    const personThumbnails = await getPersonImages(
+      options.immichUrl,
+      options.immichKey,
+      immichPersonIds
+    );
 
-    await updateContacts(options, matchedEntries, personThumbnails);
+    await updateContacts(
+      options.carddavUrl,
+      options.carddavUsername,
+      options.carddavPassword,
+      matchedEntries,
+      personThumbnails
+    );
     consola.success("Synchronization completed successfully!");
   } catch (error) {
     consola.error("Synchronization failed:", error);

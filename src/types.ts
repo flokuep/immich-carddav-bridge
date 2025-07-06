@@ -2,9 +2,10 @@ export interface BaseOptions {
   immichUrl: string;
   immichKey: string;
   carddavUrl: string;
-  carddavPath: string;
+  carddavPathTemplate: string;
   carddavUsername: string;
   carddavPassword: string;
+  carddavAddressbooks: string[];
 }
 
 export interface ImmichPerson {

@@ -1,5 +1,5 @@
 import { getAllPeople, getPersonThumbnail, init } from "@immich/sdk";
-import { BaseOptions, ImmichPerson } from "../types";
+import { ImmichPerson } from "../types";
 import consola from "consola";
 
 let isSdkInitialized = false;
@@ -8,17 +8,19 @@ let isSdkInitialized = false;
  * Fetches all people from the Immich API, handling pagination.
  * Filters out people with empty names and maps them to ImmichPerson format.
  *
- * @param options -
+ * @param baseUrl - The base URL for the Immich API.
+ * @param apiKey - The API key for authentication with Immich.
  * @returns A Promise that resolves to an array of ImmichPerson objects.
  * @throws {Error} If the API call fails or initialization was not done.
  */
 export async function getImmichPeople(
-  options: BaseOptions
+  baseUrl: string,
+  apiKey: string
 ): Promise<ImmichPerson[]> {
   consola.start(
     "Getting people from immich server. Hidden people are not fetched, expect less people processed than total people."
   );
-  initializeImmichSdk(options.immichUrl, options.immichKey);
+  initializeImmichSdk(baseUrl, apiKey);
 
   const allImmichPeople: ImmichPerson[] = [];
   let currentPageNumber = 1; // For logging/tracking pages
@@ -58,17 +60,20 @@ export async function getImmichPeople(
  *
  * Pre-requisite: `initializeImmichSdk` must have been called beforehand.
  *
+ * @param baseUrl - The base URL for the Immich API.
+ * @param apiKey - The API key for authentication with Immich.
  * @param ids - An array of Immich person IDs for which to fetch thumbnails.
  * @returns A Promise that resolves to an object mapping person ID to Blob thumbnail data.
  * If a thumbnail fetch fails for an ID, that ID might be missing from the returned object.
  * @throws {Error} If any parallel API call for a thumbnail fails critically.
  */
 export async function getPersonImages(
-  options: BaseOptions,
+  baseUrl: string,
+  apiKey: string,
   ids: string[]
 ): Promise<{ [key: string]: Blob }> {
   consola.start("Getting people previews from immich server");
-  initializeImmichSdk(options.immichUrl, options.immichKey);
+  initializeImmichSdk(baseUrl, apiKey);
 
   const thumbnails: { [key: string]: Blob } = {};
   const fetchPromises: Promise<void>[] = [];

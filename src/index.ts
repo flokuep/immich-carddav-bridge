@@ -27,9 +27,9 @@ program
     process.env.CARDDAV_URL
   )
   .requiredOption(
-    "--carddav-path [path]",
-    "CardDAV addressbook path",
-    process.env.CARDDAV_PATH
+    "--carddav-path-template [pathTemplate]",
+    "CardDAV path template",
+    process.env.CARDDAV_PATH_TEMPLATE
   )
   .requiredOption(
     "--carddav-username [username]",
@@ -40,6 +40,12 @@ program
     "--carddav-password [password]",
     "Password or token of CardDAV user",
     process.env.CARDDAV_PASSWORD
+  )
+  .requiredOption(
+    "--carddav-addressbooks [addressbooks]",
+    "Comma-seperated list of addressbooks, empty for all",
+    commaSeparatedList,
+    commaSeparatedList(process.env.CARDDAV_ADDRESSBOOKS, [])
   );
 
 program
@@ -54,3 +60,10 @@ program
   });
 
 program.parse(process.argv);
+
+function commaSeparatedList(
+  value: string | undefined,
+  _previous: string[]
+): string[] {
+  return value ? value.split(",") : [];
+}

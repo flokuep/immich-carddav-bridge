@@ -1,5 +1,5 @@
 import { DAVAddressBook, DAVClient, DAVObject } from "tsdav";
-import { BaseOptions, CardDavContact } from "../types";
+import { CardDavContact } from "../types";
 import { parseVCards } from "vcard4-ts";
 import consola from "consola";
 
@@ -10,20 +10,23 @@ import consola from "consola";
  * @returns A promise that resolves to the primary DAVAddressBook.
  * @throws {Error} If no address books are found.
  */
-export async function getPrimaryCardDavAddressBook(
+export async function getCardDavAddressbooks(
   client: DAVClient,
-  options: BaseOptions
-): Promise<DAVAddressBook> {
+  url: string,
+  username: string,
+  password: string,
+  pathTemplate: string
+): Promise<DAVAddressBook[]> {
   const addressBooks = await client.fetchAddressBooks({
     account: {
       accountType: "carddav",
-      serverUrl: options.carddavUrl,
+      serverUrl: url,
       credentials: {
-        username: options.carddavUsername,
-        password: options.carddavPassword,
+        username: username,
+        password: password,
       },
-      rootUrl: options.carddavUrl + options.carddavPath,
-      homeUrl: options.carddavUrl + options.carddavPath,
+      rootUrl: url + pathTemplate.replaceAll("$CARDDAV_USERNAME", username),
+      homeUrl: url + pathTemplate.replaceAll("$CARDDAV_USERNAME", username),
     },
   });
 
@@ -31,9 +34,7 @@ export async function getPrimaryCardDavAddressBook(
     throw new Error("No CardDAV address books found.");
   }
 
-  const targetAddressBook = addressBooks[0];
-  consola.info(`Connecting to CardDAV address book: ${targetAddressBook.url}`);
-  return targetAddressBook;
+  return addressBooks;
 }
 
 /**

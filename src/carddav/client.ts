@@ -1,5 +1,4 @@
 import { DAVClient } from "tsdav";
-import { BaseOptions } from "../types";
 import consola from "consola";
 
 /**
@@ -7,13 +6,15 @@ import consola from "consola";
  * @returns A promise that resolves to an initialized DAVClient.
  */
 export async function createDavClient(
-  options: BaseOptions
+  serverUrl: string,
+  username: string,
+  password: string
 ): Promise<DAVClient> {
   const client = new DAVClient({
-    serverUrl: options.carddavUrl,
+    serverUrl,
     credentials: {
-      username: options.carddavUsername,
-      password: options.carddavPassword,
+      username,
+      password,
     },
   });
   try {
