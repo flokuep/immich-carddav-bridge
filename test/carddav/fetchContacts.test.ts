@@ -4,7 +4,7 @@ import { parseVCards } from "vcard4-ts";
 import { BaseOptions } from "../../src/types"; // Pfad anpassen
 import {
   fetchAndParseVCards,
-  getPrimaryCardDavAddressBook,
+  getCardDavAddressbooks,
 } from "../../src/carddav/fetchContacts";
 import consola from "consola";
 
@@ -51,9 +51,10 @@ describe("CardDAV Client Operations", () => {
 
     defaultOptions = {
       carddavUrl: "https://test.cloud.com/remote.php/dav",
-      carddavPath: "/addressbooks/users/testuser/kontakte/",
+      carddavPathTemplate: "/addressbooks/users/$CARDDAV_USERNAME/",
       carddavUsername: "testuser",
       carddavPassword: "testpassword",
+      carddavAddressbooks: [],
       immichUrl: "testurl",
       immichKey: "testkey",
     };
@@ -69,8 +70,8 @@ describe("CardDAV Client Operations", () => {
     consoleLogSpy.mockRestore();
   });
 
-  describe("getPrimaryCardDavAddressBook", () => {
-    test("should return the first address book if found", async () => {
+  describe("getCardDavAddressBooks", () => {
+    test("should return all addressbooks", async () => {
       const mockAddressBook: DAVAddressBook = {
         url: "https://test.cloud.com/dav/addressbooks/user/test/",
         displayName: "Test Contacts",
@@ -78,12 +79,15 @@ describe("CardDAV Client Operations", () => {
       };
       mockFetchAddressBooks.mockResolvedValueOnce([mockAddressBook]);
 
-      const result = await getPrimaryCardDavAddressBook(
+      const result = await getCardDavAddressbooks(
         mockClient,
-        defaultOptions
+        defaultOptions.carddavUrl,
+        defaultOptions.carddavUsername,
+        defaultOptions.carddavPassword,
+        defaultOptions.carddavPathTemplate
       );
 
-      expect(result).toEqual(mockAddressBook);
+      expect(result).toEqual([mockAddressBook]);
       expect(mockFetchAddressBooks).toHaveBeenCalledTimes(1);
       expect(mockFetchAddressBooks).toHaveBeenCalledWith({
         account: expect.objectContaining({
@@ -94,21 +98,24 @@ describe("CardDAV Client Operations", () => {
             password: "testpassword",
           },
           homeUrl:
-            "https://test.cloud.com/remote.php/dav/addressbooks/users/testuser/kontakte/",
+            "https://test.cloud.com/remote.php/dav/addressbooks/users/testuser/",
           rootUrl:
-            "https://test.cloud.com/remote.php/dav/addressbooks/users/testuser/kontakte/",
+            "https://test.cloud.com/remote.php/dav/addressbooks/users/testuser/",
         }),
       });
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Connecting to CardDAV address book")
-      );
     });
 
     test("should throw an error if no address books are found", async () => {
       mockFetchAddressBooks.mockResolvedValueOnce([]);
 
       await expect(
-        getPrimaryCardDavAddressBook(mockClient, defaultOptions)
+        getCardDavAddressbooks(
+          mockClient,
+          defaultOptions.carddavUrl,
+          defaultOptions.carddavUsername,
+          defaultOptions.carddavPassword,
+          defaultOptions.carddavPathTemplate
+        )
       ).rejects.toThrow("No CardDAV address books found.");
       expect(mockFetchAddressBooks).toHaveBeenCalledTimes(1);
       expect(consoleLogSpy).not.toHaveBeenCalled(); // No log message if no address book found
@@ -119,7 +126,13 @@ describe("CardDAV Client Operations", () => {
       mockFetchAddressBooks.mockRejectedValueOnce(mockError); // Simulate network error
 
       await expect(
-        getPrimaryCardDavAddressBook(mockClient, defaultOptions)
+        getCardDavAddressbooks(
+          mockClient,
+          defaultOptions.carddavUrl,
+          defaultOptions.carddavUsername,
+          defaultOptions.carddavPassword,
+          defaultOptions.carddavPathTemplate
+        )
       ).rejects.toThrow(mockError);
       expect(mockFetchAddressBooks).toHaveBeenCalledTimes(1);
       expect(consoleLogSpy).not.toHaveBeenCalled();
