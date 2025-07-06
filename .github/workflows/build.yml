@@ -4,6 +4,8 @@ on:
     branches: ["main"]
     tags:
       - v**
+  pull_request:
+    types: [opened, reopened]
   workflow_run:
     workflows: [Release]
     types:
