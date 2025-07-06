@@ -29,13 +29,13 @@ Please ensure that `immich-carddav-bridge` can reach both your Immich instance a
     IMMICH_URL=https://your-immich-instance/api
     IMMICH_KEY=YOUR_IMMICH_API_KEY
     CARDDAV_URL=https://your-carddav-server/dav/
-    CARDDAV_PATH=/addressbooks/users/your_carddav_user/your_addressbook/
     CARDDAV_USERNAME=your_carddav_user
     CARDDAV_PASSWORD=your_carddav_pass_or_token
+    CARDDAV_PATH_TEMPLATE=/addressbooks/users/$CARDDAV_USERNAME/
     CRON_SCHEDULE=0 0 * * *
     ```
 
-    _Adjust these variables to match your setup._
+    _Adjust these variables to match your setup._ You can specify the list of addressbooks by setting a comma-seperated list of addressbook-names to CARDDAV_ADDRESSBOOKS. Otherwise all addressbooks were fetched.
 
 2.  **Adjust your `docker-compose.yaml`:**
     Add the `immich-carddav-bridge` service to your existing `docker-compose.yaml` file:
@@ -59,9 +59,9 @@ Please ensure that `immich-carddav-bridge` can reach both your Immich instance a
 
 This bridge has been tested with the following CardDAV servers. Your `CARDDAV_URL` and `CARDDAV_PATH` settings will vary depending on your server configuration.
 
-| CardDAV Server | `CARDDAV_URL` Example                        | `CARDDAV_PATH` Example                        | Notes                                            |
-| :------------- | :------------------------------------------- | :-------------------------------------------- | :----------------------------------------------- |
-| **Nextcloud**  | `https://your-nextcloud.com/remote.php/dav/` | `/addressbooks/users/your_username/contacts/` | Ensure your user has access to the address book. |
+| CardDAV Server | `CARDDAV_URL` Example                        | `CARDDAV_PATH` Example                   | Notes                                            |
+| :------------- | :------------------------------------------- | :--------------------------------------- | :----------------------------------------------- |
+| **Nextcloud**  | `https://your-nextcloud.com/remote.php/dav/` | `/addressbooks/users/$CARDDAV_USERNAME/` | Ensure your user has access to the address book. |
 
 ## 🧑‍💻 Development
 
