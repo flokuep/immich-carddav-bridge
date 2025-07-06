@@ -1,4 +1,5 @@
 #!/bin/sh
+
 if [ -z "${CRON_SCHEDULE}" ]; then
   echo "CRON_SCHEDULE is not set. The cron job will not be configured."
   if [ -f "/etc/cron.d/immich-carddav-bridge" ]; then
@@ -8,7 +9,7 @@ if [ -z "${CRON_SCHEDULE}" ]; then
 else
   # Wenn CRON_SCHEDULE gesetzt ist, erstelle die Cronjob-Konfigurationsdatei
   # Der Cronjob wird den Node.js-Befehl ausführen und die Ausgabe in die Logdatei umleiten
-  echo "${CRON_SCHEDULE} root /usr/local/bin/node /app/dist/index.js sync --immich-url ${IMMICH_URL} --immich-key ${IMMICH_KEY} --carddav-url ${CARDDAV_URL} --carddav-username ${CARDDAV_USERNAME} --carddav-password ${CARDDAV_PASSWORD} --carddav-path ${CARDDAV_PATH} >> /var/log/cron.log 2>&1" > /etc/cron.d/immich-carddav-bridge
+  echo "${CRON_SCHEDULE} root /usr/local/bin/node /app/dist/index.js sync --immich-url ${IMMICH_URL} --immich-key ${IMMICH_KEY} --carddav-url ${CARDDAV_URL} --carddav-username ${CARDDAV_USERNAME} --carddav-password ${CARDDAV_PASSWORD} --carddav-path-template ${CARDDAV_PATH_TEMPLATE} --carddav-addressbooks ${CARDDAV_ADDRESSBOOKS} >> /var/log/cron.log 2>&1" > /etc/cron.d/immich-carddav-bridge
 
   # Setze die korrekten Berechtigungen für die Cronjob-Datei
   chmod 0644 /etc/cron.d/immich-carddav-bridge
