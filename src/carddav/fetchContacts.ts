@@ -25,8 +25,8 @@ export async function getCardDavAddressbooks(
         username: username,
         password: password,
       },
-      rootUrl: url + pathTemplate,
-      homeUrl: url + pathTemplate,
+      rootUrl: url + pathTemplate.replaceAll("$CARDDAV_USERNAME", username),
+      homeUrl: url + pathTemplate.replaceAll("$CARDDAV_USERNAME", username),
     },
   });
 
