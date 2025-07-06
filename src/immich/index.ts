@@ -28,7 +28,10 @@ export async function getImmichPeople(
 
   try {
     do {
-      currentPeoplePage = await getAllPeople({ withHidden: false });
+      currentPeoplePage = await getAllPeople({
+        withHidden: false,
+        page: currentPageNumber,
+      });
       consola.info(
         `Fetched Immich people page ${currentPageNumber} with ${currentPeoplePage.people.length}/${currentPeoplePage.total} people.`
       );
