@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import sync from "./commands/sync";
 import { version } from "../package.json";
+import multiSync from "./commands/multiSync";
 
 const program = new Command();
 
@@ -10,7 +11,11 @@ program
   .description(
     "Syncs preview pictures of recognized people from immich to pictures of CardDAV contacts."
   )
-  .version(version)
+  .version(version);
+
+program
+  .command("sync")
+  .description("Run synchronisation")
   .requiredOption(
     "--immich-url [url]",
     "Immich server URL",
@@ -46,17 +51,25 @@ program
     "Comma-seperated list of addressbooks, empty for all",
     commaSeparatedList,
     commaSeparatedList(process.env.CARDDAV_ADDRESSBOOKS, [])
-  );
-
-program
-  .command("sync")
-  .description("Run synchronisation")
+  )
   .option(
     "-d, --dry-run",
     "Read people and match contacts but without transferring pictures"
   )
   .action((options) => {
-    sync(program.opts(), options.dryRun);
+    sync(options, options.dryRun);
+  });
+
+program
+  .command("multi-sync")
+  .description("Run synchronisation on multiple configurations")
+  .argument("<config-file>")
+  .option(
+    "-d, --dry-run",
+    "Read people and match contacts but without transferring pictures"
+  )
+  .action((configFile, options) => {
+    multiSync(configFile, options.dryRun);
   });
 
 program.parse(process.argv);

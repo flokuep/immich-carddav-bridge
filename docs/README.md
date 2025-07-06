@@ -18,7 +18,7 @@ Make sure you have:
 
 ### Installation & Configuration
 
-You can either extend your existing `docker-compose.yaml` file for your Immich server or create a separate one for `immich-carddav-bridge`. The following instructions are for integrating into an existing Docker Compose setup. The separate setup is straightforward.
+You can either extend your existing `docker-compose.yaml` file for your Immich server or create a separate one for `immich-carddav-bridge`. The following instructions are for integrating into an existing Docker Compose setup. The separate setup is straightforward. Please have a look at [Usage](usage.md) for more configuration options, including having multiple configurations.
 
 Please ensure that `immich-carddav-bridge` can reach both your Immich instance and your CardDAV server via HTTP(S).
 
@@ -53,7 +53,7 @@ Please ensure that `immich-carddav-bridge` can reach both your Immich instance a
     ```bash
     docker-compose up -d
     ```
-    This will start the bridge in the background. Check the logs with `docker-compose logs -f immich-carddav-bridge` to monitor its activity.
+    This will start the bridge in the background. Check the logs with `docker-compose logs -f immich-carddav-bridge` to monitor its activity. The synchronization will run on startup, if you don't want to have this initial run, set `SKIP_INITIAL_RUN=true` in your `.env` file.
 
 ## 🤝 Compatibility
 
