@@ -17,13 +17,15 @@ build/
 *.d.ts
 
 # Editor / IDE-spezifische Dateien
-.vscode/        # VS Code Konfigurationsdateien (optional, falls du sie nicht teilen möchtest)
-.idea/          # IntelliJ/WebStorm Konfigurationsdateien
-*.swp           # Vim swap files
-*.bak           # Backup files
+.vscode/
+.idea/
+# Vim swap files
+*.swp
+# Backup files
+*.bak
 *.log
 
 # Betriebssystem-spezifische Dateien
-.DS_Store       # macOS
-Thumbs.db       # Windows
+.DS_Store
+Thumbs.db
 
