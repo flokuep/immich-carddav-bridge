@@ -1,16 +1,17 @@
-FROM node:lts-alpine
-RUN apk add --no-cache cronie 
-
+FROM node:lts-alpine AS builder
 WORKDIR /app
-
-COPY package*.json ./
-
-RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN npm install && npm run build
 
+
+FROM node:lts-alpine AS runner
+WORKDIR /app
+
+RUN apk add --no-cache cronie
+
+COPY --from=builder /app/dist /app/dist
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
