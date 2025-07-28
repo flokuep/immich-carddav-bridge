@@ -29,7 +29,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@immich/sdk": "^1.135.3",
+    "@immich/sdk": "^1.136.0",
     "commander": "^14.0.0",
     "consola": "^3.4.2",
     "tsdav": "^2.1.5",
