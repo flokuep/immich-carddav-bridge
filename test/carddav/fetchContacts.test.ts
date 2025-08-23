@@ -171,12 +171,14 @@ describe("CardDAV Client Operations", () => {
 
       expect(result.length).toBe(2);
       expect(result[0]).toEqual({
+        uid: "",
         url: "url1",
         etag: "etag1",
         data: vCardData1,
         name: "John Doe",
       });
       expect(result[1]).toEqual({
+        uid: "",
         url: "url2",
         etag: "etag2",
         data: vCardData2,

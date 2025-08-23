@@ -1,3 +1,7 @@
+import consola from "consola";
+import { readFileSync } from "fs";
+import path from "path";
+
 /**
  * Folds a long line according to vCard specification (CRLF + space for indentation).
  * This improves the readability of generated vCard data.
@@ -26,4 +30,26 @@ export function foldLine(line: string, length: number): string {
   }
 
   return result;
+}
+
+/**
+ * Reads a file
+ * @param filePath - The path to the file.
+ * @returns {string} File content as string.
+ * @throws {Error} If the file cannot be read, parsed, or is invalid.
+ */
+export async function readFile(filePath: string): Promise<string> {
+  try {
+    const resolvedFilePath = path.resolve(filePath);
+    const fileContent = readFileSync(resolvedFilePath, "utf8");
+
+    if (!fileContent.trim()) {
+      consola.warn(`Configuration file '${filePath}' is empty.`);
+      return "";
+    }
+
+    return fileContent;
+  } catch (error: any) {
+    throw error;
+  }
 }

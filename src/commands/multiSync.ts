@@ -1,8 +1,7 @@
 import consola from "consola";
-import { readFileSync } from "fs";
-import path from "path";
 import sync from "./sync";
 import { BaseOptions } from "../types";
+import { readFile } from "../utils";
 
 /**
  * Runs synchronization on multiple configurations defined in a JSON file.
@@ -40,15 +39,7 @@ export default async function multiSync(
  */
 async function readConfigurations(filePath: string): Promise<BaseOptions[]> {
   try {
-    const resolvedFilePath = path.resolve(filePath);
-    const fileContent = readFileSync(resolvedFilePath, "utf8");
-
-    if (!fileContent.trim()) {
-      consola.warn(`Configuration file '${filePath}' is empty.`);
-      return [];
-    }
-
-    return parseConfigurations(fileContent);
+    return parseConfigurations(await readFile(filePath));
   } catch (error: any) {
     handleError(error, filePath);
     throw error;

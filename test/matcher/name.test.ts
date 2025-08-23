@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vitest";
 import { CardDavContact, ImmichPerson, MatchedContact } from "../../src/types";
-import matchPeopleToContacts from "../../src/matcher";
+import matchPeopleToContactsByName from "../../src/matcher/name";
 
-describe("matchPeopleToContacts", () => {
+describe("matchPeopleToContactsByName", () => {
   test("should correctly match people to contacts with exact names", () => {
     const immichPeople: ImmichPerson[] = [
       { id: "1", name: "Alice", preview: "preview_a" },
@@ -10,9 +10,9 @@ describe("matchPeopleToContacts", () => {
       { id: "3", name: "Charlie", preview: "preview_c" },
     ];
     const cardDavContacts: CardDavContact[] = [
-      { url: "url_b", etag: "etag_b", data: "data_b", name: "Bob" },
-      { url: "url_a", etag: "etag_a", data: "data_a", name: "Alice" },
-      { url: "url_d", etag: "etag_d", data: "data_d", name: "David" },
+      { uid: "b", url: "url_b", etag: "etag_b", data: "data_b", name: "Bob" },
+      { uid: "a", url: "url_a", etag: "etag_a", data: "data_a", name: "Alice" },
+      { uid: "d", url: "url_d", etag: "etag_d", data: "data_d", name: "David" },
     ];
 
     const expectedMatches: MatchedContact[] = [
@@ -20,7 +20,7 @@ describe("matchPeopleToContacts", () => {
       { immich: immichPeople[1], cardDav: cardDavContacts[0] }, // Bob
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
 
     expect(result).toEqual(expectedMatches);
     expect(result.length).toBe(2);
@@ -32,11 +32,17 @@ describe("matchPeopleToContacts", () => {
       { id: "2", name: "Bob", preview: "preview_b" },
     ];
     const cardDavContacts: CardDavContact[] = [
-      { url: "url_x", etag: "etag_x", data: "data_x", name: "Xavier" },
-      { url: "url_y", etag: "etag_y", data: "data_y", name: "Yara" },
+      {
+        uid: "x",
+        url: "url_x",
+        etag: "etag_x",
+        data: "data_x",
+        name: "Xavier",
+      },
+      { uid: "y", url: "url_y", etag: "etag_y", data: "data_y", name: "Yara" },
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     expect(result).toEqual([]);
     expect(result.length).toBe(0);
   });
@@ -45,7 +51,7 @@ describe("matchPeopleToContacts", () => {
     const immichPeople: ImmichPerson[] = [];
     const cardDavContacts: CardDavContact[] = [];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     expect(result).toEqual([]);
     expect(result.length).toBe(0);
   });
@@ -53,10 +59,10 @@ describe("matchPeopleToContacts", () => {
   test("should return an empty array when immichPeople array is empty", () => {
     const immichPeople: ImmichPerson[] = [];
     const cardDavContacts: CardDavContact[] = [
-      { url: "url_a", etag: "etag_a", data: "data_a", name: "Alice" },
+      { uid: "a", url: "url_a", etag: "etag_a", data: "data_a", name: "Alice" },
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     expect(result).toEqual([]);
   });
 
@@ -66,7 +72,7 @@ describe("matchPeopleToContacts", () => {
     ];
     const cardDavContacts: CardDavContact[] = [];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     expect(result).toEqual([]);
   });
 
@@ -78,15 +84,29 @@ describe("matchPeopleToContacts", () => {
       { id: "4", name: "Diego", preview: "preview_d" },
     ];
     const cardDavContacts: CardDavContact[] = [
-      { url: "url_ben", etag: "etag_ben", data: "data_ben", name: "Ben" },
       {
+        uid: "b",
+        url: "url_ben",
+        etag: "etag_ben",
+        data: "data_ben",
+        name: "Ben",
+      },
+      {
+        uid: "c",
         url: "url_clara",
         etag: "etag_clara",
         data: "data_clara",
         name: "Clara",
       },
-      { url: "url_eve", etag: "etag_eve", data: "data_eve", name: "Eve" }, // Unique to CardDav
       {
+        uid: "e",
+        url: "url_eve",
+        etag: "etag_eve",
+        data: "data_eve",
+        name: "Eve",
+      }, // Unique to CardDav
+      {
+        uid: "a",
         url: "url_anna_alt",
         etag: "etag_anna_alt",
         data: "data_anna_alt",
@@ -100,7 +120,7 @@ describe("matchPeopleToContacts", () => {
       { immich: immichPeople[2], cardDav: cardDavContacts[1] }, // Clara
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     const sortedResult = result.toSorted((a, b) =>
       a.immich.name.localeCompare(b.immich.name)
     );
@@ -117,10 +137,16 @@ describe("matchPeopleToContacts", () => {
       { id: "1", name: "john", preview: "preview_j" },
     ];
     const cardDavContacts: CardDavContact[] = [
-      { url: "url_john", etag: "etag_john", data: "data_john", name: "John" },
+      {
+        uid: "j",
+        url: "url_john",
+        etag: "etag_john",
+        data: "data_john",
+        name: "John",
+      },
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     expect(result).toEqual([]);
   });
 
@@ -131,12 +157,14 @@ describe("matchPeopleToContacts", () => {
     ];
     const cardDavContacts: CardDavContact[] = [
       {
+        uid: "j",
         url: "url_joao",
         etag: "etag_joao",
         data: "data_joao",
         name: "João Silva",
       },
       {
+        uid: "u",
         url: "url_user",
         etag: "etag_user",
         data: "data_user",
@@ -149,7 +177,7 @@ describe("matchPeopleToContacts", () => {
       { immich: immichPeople[1], cardDav: cardDavContacts[1] },
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     const sortedResult = result.toSorted((a, b) =>
       a.immich.name.localeCompare(b.immich.name)
     );
@@ -175,6 +203,7 @@ describe("matchPeopleToContacts", () => {
       // Create some matches and some non-matches
       if (i % 2 === 0) {
         cardDavContacts.push({
+          uid: `${i}`,
           url: `dav-${i}`,
           etag: `etag-${i}`,
           data: `data-${i}`,
@@ -182,6 +211,7 @@ describe("matchPeopleToContacts", () => {
         });
       } else {
         cardDavContacts.push({
+          uid: `${i}`,
           url: `dav-nomatch-${i}`,
           etag: `etag-nomatch-${i}`,
           data: `data-nomatch-${i}`,
@@ -195,7 +225,7 @@ describe("matchPeopleToContacts", () => {
     cardDavContacts.sort(() => Math.random() - 0.5);
 
     const startTime = process.hrtime.bigint();
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     const endTime = process.hrtime.bigint();
     const durationMs = Number(endTime - startTime) / 1_000_000; // Convert nanoseconds to milliseconds
 
@@ -219,12 +249,18 @@ describe("matchPeopleToContacts", () => {
       { id: "3", name: "Charlie", preview: "preview_c" },
     ];
     const cardDavContacts: CardDavContact[] = [
-      { url: "url_a", etag: "etag_a", data: "data_a", name: "Alice" },
-      { url: "url_b", etag: "etag_b", data: "data_b", name: "Bob" },
-      { url: "url_c", etag: "etag_c", data: "data_c", name: " Charlie " }, // both leading/trailing
+      { uid: "a", url: "url_a", etag: "etag_a", data: "data_a", name: "Alice" },
+      { uid: "b", url: "url_b", etag: "etag_b", data: "data_b", name: "Bob" },
+      {
+        uid: "c",
+        url: "url_c",
+        etag: "etag_c",
+        data: "data_c",
+        name: " Charlie ",
+      }, // both leading/trailing
     ];
 
-    const result = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const result = matchPeopleToContactsByName(immichPeople, cardDavContacts);
     expect(result).toEqual([]);
   });
 });

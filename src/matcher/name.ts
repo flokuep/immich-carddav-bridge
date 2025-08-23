@@ -16,11 +16,11 @@ import { CardDavContact, ImmichPerson, MatchedContact } from "../types";
  * If fuzzy matching or more complex matching rules are needed, this function
  * would require significant modification or a different algorithm.
  */
-export default function matchPeopleToContacts(
+export default function matchPeopleToContactsByName(
   immichPeople: ImmichPerson[],
   cardDavContacts: CardDavContact[]
 ): MatchedContact[] {
-  consola.start("Matching immich people to carddav contacts");
+  consola.start("Matching immich people to carddav contacts by name");
   // Sort both lists by name to enable efficient two-pointer matching
   const sortedImmichPeople = sortItemsByName(immichPeople);
   const sortedCardDavContacts = sortItemsByName(cardDavContacts);
