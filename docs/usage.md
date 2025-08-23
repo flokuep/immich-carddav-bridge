@@ -12,16 +12,17 @@ The `sync` command initiates the synchronization process. It connects to your Im
 
 The following options are **required** for the `sync` command to function correctly. You can provide these options directly on the command line or set them as environment variables. Environment variables are checked first, providing a convenient way to manage your credentials without exposing them in your shell history.
 
-| **Option**                               | **Environment Variable** | **Description**                                                                                                                                                                                                                                                                                                                                        |
-| :--------------------------------------- | :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--immich-url <url>`                     | `IMMICH_URL`             | The base URL of your Immich server.                                                                                                                                                                                                                                                                                                                    |
-| `--immich-key <key>`                     | `IMMICH_KEY`             | Your Immich API key. You can generate this in your Immich user settings.                                                                                                                                                                                                                                                                               |
-| `--carddav-url <url>`                    | `CARDDAV_URL`            | The base URL of your CardDAV server (e.g., `https://carddav.example.com`).                                                                                                                                                                                                                                                                             |
-| `--carddav-path-template <pathTemplate>` | `CARDDAV_PATH_TEMPLATE`  | A template for the path to your CardDAV address books. This often includes placeholders like `${CARDDAV_USERNAME}`.                                                                                                                                                                                                                                    |
-| `--carddav-username <username>`          | `CARDDAV_USERNAME`       | The username for authenticating with your CardDAV server.                                                                                                                                                                                                                                                                                              |
-| `--carddav-password <password>`          | `CARDDAV_PASSWORD`       | The password or token for your CardDAV user.                                                                                                                                                                                                                                                                                                           |
-| `--carddav-addressbooks <addressbooks>`  | `CARDDAV_ADDRESSBOOKS`   | A comma-separated list of CardDAV address book names to synchronize. If left empty, all available address books will be processed.                                                                                                                                                                                                                     |
-| `-d, --dry-run`                          |                          | Performs a "dry run" of the synchronization. This means the tool will read people from Immich and attempt to match them with your CardDAV contacts, but **no pictures will actually be transferred or updated** on your CardDAV server. This is useful for testing your configuration and seeing what changes would be made before committing to them. |
+| **Option**                                        | **Environment Variable** | **Description**                                                                                                                                                                                                                                                                                                                                        |
+| :------------------------------------------------ | :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--immich-url <url>`                              | `IMMICH_URL`             | The base URL of your Immich server.                                                                                                                                                                                                                                                                                                                    |
+| `--immich-key <key>`                              | `IMMICH_KEY`             | Your Immich API key. You can generate this in your Immich user settings.                                                                                                                                                                                                                                                                               |
+| `--carddav-url <url>`                             | `CARDDAV_URL`            | The base URL of your CardDAV server (e.g., `https://carddav.example.com`).                                                                                                                                                                                                                                                                             |
+| `--carddav-path-template <pathTemplate>`          | `CARDDAV_PATH_TEMPLATE`  | A template for the path to your CardDAV address books. This often includes placeholders like `${CARDDAV_USERNAME}`.                                                                                                                                                                                                                                    |
+| `--carddav-username <username>`                   | `CARDDAV_USERNAME`       | The username for authenticating with your CardDAV server.                                                                                                                                                                                                                                                                                              |
+| `--carddav-password <password>`                   | `CARDDAV_PASSWORD`       | The password or token for your CardDAV user.                                                                                                                                                                                                                                                                                                           |
+| `--carddav-addressbooks <addressbooks>`           | `CARDDAV_ADDRESSBOOKS`   | A comma-separated list of CardDAV address book names to synchronize. If left empty, all available address books will be processed.                                                                                                                                                                                                                     |
+| `-d, --dry-run`                                   |                          | Performs a "dry run" of the synchronization. This means the tool will read people from Immich and attempt to match them with your CardDAV contacts, but **no pictures will actually be transferred or updated** on your CardDAV server. This is useful for testing your configuration and seeing what changes would be made before committing to them. |
+| `--matching-contacts-file <matchingContactsFile>` | `MATCHING_CONTACTS_FILE` | Path to a JSON file for manual matching of Immich people and CardDAV contacts. See "Manual Contact Matching" section for details.                                                                                                                                                                                                                      |
 
 **Example Usage for `sync`:**
 
@@ -108,6 +109,7 @@ Here's an example of a `my-config.json` file. Each object in the array represent
     carddavUsername: "your_carddav_user_1",
     carddavPassword: "your_carddav_password_1",
     carddavAddressbooks: ["personal", "family"],
+    matchingContactsFile: "./manual-matches-1.json",
   },
   {
     immichUrl: "https://immich.example.com",
@@ -116,10 +118,13 @@ Here's an example of a `my-config.json` file. Each object in the array represent
     carddavPathTemplate: "/dav/${CARDDAV_USERNAME}/addressbooks/",
     carddavUsername: "your_carddav_user_2",
     carddavPassword: "your_carddav_password_2",
+    matchingContactsFile: "./manual-matches-2.json",
     carddavAddressbooks: ["work"],
   },
 ];
 ```
+
+The usage of `matchinContactsFile` is optional.
 
 For docker usage, easily mount the config file into your container:
 
@@ -135,6 +140,18 @@ and set this file in your environment file:
 ```
 
 ---
+
+## Manual Contact Matching
+
+You can provide a JSON file that maps Immich person UUIDs to CardDAV UIDs for manual contact matching. This may be necessary if you have different naming schemes and the automatic matching isn't working correctly. You'll find the necessary configuration options in the preceding chapters. The following is a simple example of the file structure.
+
+```js
+{
+  "immich-person-id-1": "carddav-contact-uid-1",
+  "immich-person-id-2": "carddav-contact-uid-2",
+  "immich-person-id-3": "carddav-contact-uid-3"
+}
+```
 
 ## Getting Help
 
