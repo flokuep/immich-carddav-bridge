@@ -53,6 +53,10 @@ program
     commaSeparatedList(process.env.CARDDAV_ADDRESSBOOKS, [])
   )
   .option(
+    "--matching-contacts-file (matchingContactsFile)",
+    "JSON-File for manual matching of contacts and people"
+  )
+  .option(
     "-d, --dry-run",
     "Read people and match contacts but without transferring pictures"
   )

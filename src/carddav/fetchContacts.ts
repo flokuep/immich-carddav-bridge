@@ -91,10 +91,12 @@ function processDavObjectToCardDavContact(
   }
 
   const primaryVCard = parsedVCards[0];
+  const uid = primaryVCard.UID ? primaryVCard.UID.value : "";
   const contactName = primaryVCard.FN?.[0]?.value;
 
   if (contactName) {
     return {
+      uid: uid,
       url: davObject.url,
       etag: davObject.etag,
       data: davObject.data,

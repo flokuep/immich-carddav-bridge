@@ -6,6 +6,7 @@ export interface BaseOptions {
   carddavUsername: string;
   carddavPassword: string;
   carddavAddressbooks: string[];
+  matchingContactsFile?: string;
 }
 
 export interface ImmichPerson {
@@ -15,6 +16,7 @@ export interface ImmichPerson {
 }
 
 export interface CardDavContact {
+  uid: string;
   url: string;
   etag?: string;
   data: string;

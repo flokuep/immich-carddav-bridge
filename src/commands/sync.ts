@@ -1,8 +1,10 @@
 import consola from "consola";
 import { updateContacts, getCardDavContacts } from "../carddav/carddav";
 import { getImmichPeople, getPersonImages } from "../immich";
-import matchPeopleToContacts from "../matcher";
-import { BaseOptions } from "../types";
+import matchPeopleToContactsByName from "../matcher/name";
+import { BaseOptions, CardDavContact, ImmichPerson } from "../types";
+import matchPeopleToContactsByDict from "../matcher/dict";
+import { readFile } from "../utils";
 
 /**
  * Synchronizes pictures of Immich people with CardDAV contact images.
@@ -24,7 +26,11 @@ export default async function sync(
         options.carddavAddressbooks
       ),
     ]);
-    const matchedEntries = matchPeopleToContacts(immichPeople, cardDavContacts);
+    const matchedEntries = await matchEntries(
+      immichPeople,
+      cardDavContacts,
+      options.matchingContactsFile
+    );
     if (dryRun) {
       consola.warn("Dry run enabled. No changes will be applied.");
       return;
@@ -48,4 +54,34 @@ export default async function sync(
   } catch (error) {
     consola.error("Synchronization failed:", error);
   }
+}
+
+async function matchEntries(
+  immichPeople: ImmichPerson[],
+  cardDavContacts: CardDavContact[],
+  matchingContactsFile?: string
+) {
+  if (matchingContactsFile) {
+    const dict = parseMatchingContactsFile(
+      await readFile(matchingContactsFile)
+    );
+    return matchPeopleToContactsByDict(immichPeople, cardDavContacts, dict);
+  } else {
+    return matchPeopleToContactsByName(immichPeople, cardDavContacts);
+  }
+}
+
+function parseMatchingContactsFile(fileContent: string): {
+  [key: string]: string;
+} {
+  const matchingContacts: { [key: string]: string } = JSON.parse(fileContent);
+
+  if (matchingContacts instanceof Object && !Array.isArray(matchingContacts)) {
+    consola.error(
+      "Matching contacts file must contain a JSON object of key/value strings."
+    );
+    throw new Error("Invalid matching contacts file format.");
+  }
+
+  return matchingContacts;
 }
