@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@immich/sdk": "^1.138.1",
-    "commander": "^14.0.0",
+    "commander": "^14.0.1",
     "consola": "^3.4.2",
     "tsdav": "^2.1.5",
     "vcard4-ts": "^0.4.1"
