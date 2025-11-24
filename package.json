@@ -20,7 +20,7 @@
   "description": "",
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.13",
     "jsdom": "^27.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
