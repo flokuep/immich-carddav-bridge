@@ -32,7 +32,7 @@
     "@immich/sdk": "^2.7.5",
     "commander": "^15.0.0",
     "consola": "^3.4.2",
-    "tsdav": "^2.2.2",
+    "tsdav": "^2.3.1",
     "vcard4-ts": "^0.4.1"
   }
 }
