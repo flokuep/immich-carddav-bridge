@@ -7,13 +7,13 @@ if [ -z "${CONFIG_FILE}" ]; then
   echo "
   #!/bin/sh
   /usr/local/bin/node /app/dist/index.js sync \
-      --immich-url ${IMMICH_URL} \
-      --immich-key ${IMMICH_KEY} \
-      --carddav-url ${CARDDAV_URL} \
-      --carddav-username ${CARDDAV_USERNAME} \
-      --carddav-password ${CARDDAV_PASSWORD} \
-      --carddav-path-template ${CARDDAV_PATH_TEMPLATE} \
-      --carddav-addressbooks ${CARDDAV_ADDRESSBOOKS} >> /var/log/cron.log 2>&1" > /app/run.sh
+      --immich-url \"${IMMICH_URL}\" \
+      --immich-key \"${IMMICH_KEY}\" \
+      --carddav-url \"${CARDDAV_URL}\" \
+      --carddav-username \"${CARDDAV_USERNAME}\" \
+      --carddav-password \"${CARDDAV_PASSWORD}\" \
+      --carddav-path-template \"${CARDDAV_PATH_TEMPLATE}\" \
+      --carddav-addressbooks \"${CARDDAV_ADDRESSBOOKS}\" >> /var/log/cron.log 2>&1" > /app/run.sh
 else
   echo "Cron job configured for multi-sync with config file '${CONFIG_FILE}'."
   # Create the run.sh script for multi-sync mode
