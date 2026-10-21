@@ -9,7 +9,7 @@ const program = new Command();
 program
   .name("immich-carddav-sync")
   .description(
-    "Syncs preview pictures of recognized people from immich to pictures of CardDAV contacts."
+    "Syncs contact portraits and optionally reconciles birthdays between CardDAV and Immich."
   )
   .version(version);
 
@@ -53,30 +53,43 @@ program
     commaSeparatedList(process.env.CARDDAV_ADDRESSBOOKS, [])
   )
   .option(
-    "--matching-contacts-file (matchingContactsFile)",
+    "--matching-contacts-file <matchingContactsFile>",
     "JSON-File for manual matching of contacts and people"
   )
+  .option("--birthday-sync <mode>", "Birthday mode: off, bidirectional, carddav-to-immich")
+  .option("--birthday-state-file <path>", "Persistent birthday checkpoint file")
+  .option("--skip-photos", "Synchronize birthdays without reading or writing portraits")
   .option(
     "-d, --dry-run",
-    "Read people and match contacts but without transferring pictures"
+    "Read and plan photo and birthday synchronization without writing changes"
   )
   .action((options) => {
-    sync(options, options.dryRun);
+    // Return the promise so Commander can await synchronization failures.
+    return sync(options, options.dryRun);
   });
 
 program
   .command("multi-sync")
   .description("Run synchronisation on multiple configurations")
   .argument("<config-file>")
+  .option("--birthday-sync <mode>", "Birthday mode: off, bidirectional, carddav-to-immich")
+  .option("--birthday-state-file <path>", "Persistent birthday checkpoint file")
+  .option("--skip-photos", "Synchronize birthdays without reading or writing portraits")
   .option(
     "-d, --dry-run",
-    "Read people and match contacts but without transferring pictures"
+    "Read and plan photo and birthday synchronization without writing changes"
   )
   .action((configFile, options) => {
-    multiSync(configFile, options.dryRun);
+    return multiSync(configFile, options.dryRun, {
+      birthdaySync: options.birthdaySync, birthdayStateFile: options.birthdayStateFile, skipPhotos: options.skipPhotos,
+    });
   });
 
-program.parse(process.argv);
+// Await async actions and expose failures to cron and Docker through the process exit code.
+program.parseAsync(process.argv).catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});
 
 function commaSeparatedList(
   value: string | undefined,

@@ -4,7 +4,9 @@ A lightweight bridge to synchronize data between your **Immich** instance and a 
 
 ## ✨ Features
 
-- Synchronizes Immich people's preview images to CardDAV contacts.
+- Imports existing CardDAV portraits into Immich and selects them as person feature photos.
+- Fills missing CardDAV contact photos with Immich person thumbnails.
+- Optionally synchronizes complete birthdays in both directions with persistent conflict detection.
 
 ## 🚀 Getting Started
 
@@ -18,48 +20,60 @@ Make sure you have:
 
 ### Installation & Configuration
 
-You can either extend your existing `docker-compose.yaml` file for your Immich server or create a separate one for `immich-carddav-bridge`. The following instructions are for integrating into an existing Docker Compose setup. The separate setup is straightforward. Please have a look at [Usage](usage.md) for more configuration options, including having multiple configurations.
+The repository includes a complete Docker example for portrait and birthday synchronization:
 
-Please ensure that `immich-carddav-bridge` can reach both your Immich instance and your CardDAV server via HTTP(S).
+- [`config.example.json`](../config.example.json) contains connection placeholders, birthday mode, checkpoint path and the portrait switch.
+- [`.env.example`](../.env.example) selects the configuration file and controls startup and scheduling.
+- [`docker-compose.yaml`](../docker-compose.yaml) mounts the configuration read-only and persists birthday checkpoints in a named volume.
 
-1.  **Set up your environment variables:**
-    Enhance your `.env` file or environment configuration:
+1. **Create your local configuration files:**
 
-    ```dotenv
-    IMMICH_URL=https://your-immich-instance/api
-    IMMICH_KEY=YOUR_IMMICH_API_KEY
-    CARDDAV_URL=https://your-carddav-server/dav/
-    CARDDAV_USERNAME=your_carddav_user
-    CARDDAV_PASSWORD=your_carddav_pass_or_token
-    CARDDAV_PATH_TEMPLATE=/addressbooks/users/$CARDDAV_USERNAME/
-    CRON_SCHEDULE=0 0 * * *
-    ```
+   ```bash
+   cp .env.example .env
+   cp config.example.json config.json
+   ```
 
-    _Adjust these variables to match your setup._ You can specify the list of addressbooks by setting a comma-seperated list of addressbook-names to CARDDAV_ADDRESSBOOKS. Otherwise all addressbooks were fetched.
+   Replace the connection URLs and credential placeholders in `config.json`. Use the credentials accepted by your CardDAV server (a password, token or app password) and an Immich API key with the [required permissions](usage.md#immich-api-permissions). The default example enables bidirectional birthdays and portrait synchronization; set `skipPhotos` to `true` for birthdays only, or `birthdaySync` to `off` to disable birthday synchronization.
 
-2.  **Adjust your `docker-compose.yaml`:**
-    Add the `immich-carddav-bridge` service to your existing `docker-compose.yaml` file:
+   The example URL and address book path are placeholders, not a universal CardDAV endpoint. Set `carddavUrl` and `carddavPathTemplate` according to your server. The address book name is its URL segment, for example `contacts`. Keep the literal `$CARDDAV_USERNAME` placeholder in the JSON path template; the bridge replaces it with `carddavUsername`.
 
-    ```yaml
-    immich-carddav-bridge:
-      container_name: immich-carddav-bridge
-      image: ghcr.io/flokuep/immich-carddav-bridge:latest
-      restart: unless-stopped
-      depends_on:
-        - immich-server # Ensure this matches your Immich service name
-    ```
+2. **Build and inspect the plan:**
 
-3.  **Run with Docker Compose:**
-    ```bash
-    docker-compose up -d
-    ```
-    This will start the bridge in the background. Check the logs with `docker-compose logs -f immich-carddav-bridge` to monitor its activity. The synchronization will run on startup, if you don't want to have this initial run, set `SKIP_INITIAL_RUN=true` in your `.env` file.
+   ```bash
+   docker compose build
+   docker compose run --rm --entrypoint node immich-carddav-bridge /app/dist/index.js multi-sync /app/config.json --dry-run
+   ```
+
+   The bridge container must be able to reach both configured server URLs. The generic Compose example uses no installation-specific Docker network.
+
+3. **Run once after reviewing the plan:**
+
+   ```bash
+   docker compose run --rm --entrypoint node immich-carddav-bridge /app/dist/index.js multi-sync /app/config.json
+   ```
+
+   Existing contact portraits are imported into Immich as additional photos and selected as person feature photos. Complete birthdays are reconciled conservatively; conflicts and yearless birthdays are preserved. See [birthday synchronization](usage.md#birthday-synchronization) for the rules.
+
+4. **Enable scheduled runs when ready:**
+
+   Set `CRON_SCHEDULE` in `.env`, for example `0 3 * * *` for daily runs at 03:00 container time, then run:
+
+   ```bash
+   docker compose up -d
+   docker compose logs -f immich-carddav-bridge
+   ```
+
+   The example starts with `SKIP_INITIAL_RUN=true` and no cron schedule, so starting the container alone does not modify your data. Remove `SKIP_INITIAL_RUN` or set it to an empty value to run on startup; any non-empty value disables the initial run.
+
+`CONFIG_FILE=/app/config.json` selects JSON mode. In that mode, connection settings come from `config.json`; single-account credentials in `.env` are not used. JSON settings override the birthday and portrait defaults in `.env`. To use environment-only connections, leave `CONFIG_FILE` empty and fill in the single-account variables.
+
+Local `.env`, `config.json` and `.bridge-state/` are ignored by Git. Commit only the example files, never credentials or birthday checkpoints.
 
 ## 🤝 Compatibility
 
-This bridge has been tested with the following CardDAV servers. Your `CARDDAV_URL` and `CARDDAV_PATH` settings will vary depending on your server configuration.
+This bridge has been tested with the following CardDAV servers. Your `CARDDAV_URL` and `CARDDAV_PATH_TEMPLATE` settings will vary depending on your server configuration.
 
-| CardDAV Server | `CARDDAV_URL` Example                        | `CARDDAV_PATH` Example                   | Notes                                            |
+| CardDAV Server | `CARDDAV_URL` Example                        | `CARDDAV_PATH_TEMPLATE` Example                   | Notes                                            |
 | :------------- | :------------------------------------------- | :--------------------------------------- | :----------------------------------------------- |
 | **Nextcloud**  | `https://your-nextcloud.com/remote.php/dav/` | `/addressbooks/users/$CARDDAV_USERNAME/` | Ensure your user has access to the address book. |
 

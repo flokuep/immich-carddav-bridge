@@ -6,7 +6,8 @@ import { readFile } from "../utils";
 /**
  * Runs synchronization on multiple configurations defined in a JSON file.
  * This function reads a configuration file, parses it, and then
- * applies a synchronization process for each configuration.
+ * applies synchronization to each configuration in sequence.
+ * Later configurations still run after a failure; the combined failure is propagated to the CLI.
  *
  * @param configFile - The path to the JSON configuration file.
  * @param dryRun - If true, the synchronization will only simulate changes without applying them. Defaults to false.
@@ -14,7 +15,8 @@ import { readFile } from "../utils";
  */
 export default async function multiSync(
   configFile: string,
-  dryRun: boolean = false
+  dryRun: boolean = false,
+  overrides: Pick<BaseOptions, "birthdaySync" | "birthdayStateFile" | "skipPhotos"> = {}
 ): Promise<void> {
   let configurations = await readConfigurations(configFile);
 
@@ -23,12 +25,19 @@ export default async function multiSync(
     return;
   }
 
-  await Promise.all(
-    configurations.map((options: BaseOptions) => {
-      consola.start(`Start synchronization for ${optionsToString(options)}`);
-      executeSingleSync(options, dryRun);
-    })
-  );
+  // Await each configuration to avoid overlapping face creation for shared accounts.
+  const failures: unknown[] = [];
+  for (const options of configurations) {
+    consola.start(`Start synchronization for ${optionsToString(options)}`);
+    try {
+      // Explicit CLI overrides apply to all configurations; undefined values preserve JSON settings.
+      const defined = Object.fromEntries(Object.entries(overrides).filter(([, value]) => value !== undefined));
+      await executeSingleSync({ ...options, ...defined }, dryRun);
+    } catch (error) {
+      failures.push(error);
+    }
+  }
+  if (failures.length) throw new AggregateError(failures, "One or more synchronizations failed.");
 }
 
 /**
@@ -65,6 +74,8 @@ async function executeSingleSync(
       `Error during synchronization for ${optionsToString(options)}:`,
       error.message
     );
+    // Preserve the rejection so logged errors also result in a failed command.
+    throw error;
   }
 }
 
@@ -89,11 +100,13 @@ function handleError(error: any, filePath: string) {
       `Invalid JSON format in configuration file '${filePath}':`,
       error.message
     );
+    throw error;
   } else {
     consola.error(
       `Failed to read or parse configuration file '${filePath}':`,
       error.message
     );
+    throw error;
   }
 }
 

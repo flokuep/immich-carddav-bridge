@@ -29,3 +29,6 @@ build/
 .DS_Store
 Thumbs.db
 
+
+# Persistent birthday checkpoints contain personal data
+.bridge-state/

@@ -6,6 +6,9 @@ if [ -z "${CONFIG_FILE}" ]; then
   # Create the run.sh script for single sync mode
   echo "
   #!/bin/sh
+  export BIRTHDAY_SYNC=\"${BIRTHDAY_SYNC:-off}\"
+  export BIRTHDAY_STATE_FILE=\"${BIRTHDAY_STATE_FILE:-/app/.bridge-state/birthdays.json}\"
+  export SKIP_PHOTOS=\"${SKIP_PHOTOS:-false}\"
   /usr/local/bin/node /app/dist/index.js sync \
       --immich-url \"${IMMICH_URL}\" \
       --immich-key \"${IMMICH_KEY}\" \
@@ -19,6 +22,9 @@ else
   # Create the run.sh script for multi-sync mode
   echo "
   #!/bin/sh
+  export BIRTHDAY_SYNC=\"${BIRTHDAY_SYNC:-off}\"
+  export BIRTHDAY_STATE_FILE=\"${BIRTHDAY_STATE_FILE:-/app/.bridge-state/birthdays.json}\"
+  export SKIP_PHOTOS=\"${SKIP_PHOTOS:-false}\"
   /usr/local/bin/node /app/dist/index.js multi-sync ${CONFIG_FILE} >> /var/log/cron.log 2>&1" > /app/run.sh
 fi
 

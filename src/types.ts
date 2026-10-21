@@ -7,12 +7,17 @@ export interface BaseOptions {
   carddavPassword: string;
   carddavAddressbooks: string[];
   matchingContactsFile?: string;
+  /** Opt-in reconciliation; defaults to off for existing installations. */
+  birthdaySync?: "off" | "bidirectional" | "carddav-to-immich";
+  birthdayStateFile?: string;
+  skipPhotos?: boolean;
 }
 
 export interface ImmichPerson {
   id: string;
   name: string;
   preview: string;
+  birthDate?: string | null;
 }
 
 export interface CardDavContact {

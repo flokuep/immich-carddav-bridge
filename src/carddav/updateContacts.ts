@@ -2,13 +2,15 @@ import { DAVClient } from "tsdav";
 import { MatchedContact } from "../types";
 import { foldLine } from "../utils";
 import consola from "consola";
+import { hasContactPhoto, markExportedPhoto } from "./photo";
 
 /**
- * Processes a single contact update: retrieves thumbnail, updates vCard data, and uploads to CardDAV.
+ * Fill a missing photo from the supplied Immich thumbnail and upload the amended vCard.
  * @param client - The initialized DAVClient.
  * @param matching - The matching object containing Immich person and CardDav contact.
  * @param thumbnails - Map of Immich IDs to Blob thumbnails.
- * @returns A promise that resolves when the update is attempted (success or failure).
+ * @returns Resolves after a successful write or when a photo update is skipped.
+ * @throws If photo conversion, the DAV request, or its HTTP response indicates failure.
  */
 export async function processSingleContactUpdate(
   client: DAVClient,
@@ -16,6 +18,10 @@ export async function processSingleContactUpdate(
   thumbnails: { [key: string]: Blob }
 ): Promise<void> {
   const { immich, cardDav } = matching;
+  
+  // Protect existing photos even when this function is called without export pre-filtering.
+  if (hasContactPhoto(cardDav.data)) return;
+
   const blob = thumbnails[immich.id];
 
   if (!blob) {
@@ -36,16 +42,22 @@ export async function processSingleContactUpdate(
       immich.name
     );
 
-    const newVCard = { ...cardDav, data: updatedVCardData };
+    // Mark the exported bytes to prevent re-import; preserve the original URL, ETag and other fields.
+    const newVCard = { ...cardDav, data: markExportedPhoto(updatedVCardData, new Uint8Array(await blob.arrayBuffer())) };
 
-    await client.updateVCard({
+    // DAV HTTP errors may be returned as responses instead of rejected promises.
+    const response = await client.updateVCard({
       vCard: newVCard,
     });
+    if (!response.ok) throw new Error("CardDAV update failed: HTTP " + response.status);
+    if (!response.ok) throw new Error("CardDAV update failed: HTTP " + response.status);
   } catch (error) {
     consola.error(
       `Error updating thumbnail for ${immich.name} (${immich.id}):`,
       error
     );
+    // Let the command report the failed write instead of claiming full success.
+    throw error;
   }
 }
 

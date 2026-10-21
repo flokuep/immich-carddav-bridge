@@ -49,11 +49,14 @@ export async function getCardDavContacts(
 }
 
 /**
- * Updates contacts on a CardDAV server with new thumbnail images.
- * @param options - Base options for DAVClient creation.
+ * Fill missing contact photos with Immich thumbnails while preserving existing photos.
+ * @param url - The CardDAV server URL.
+ * @param username - The CardDAV username.
+ * @param password - The CardDAV password or app token.
  * @param matchings - An array of objects linking Immich persons to CardDav contacts.
  * @param thumbnails - An object mapping Immich IDs to Blob thumbnails.
- * @returns A promise that resolves when all updates have been attempted (successfully or with errors).
+ * @returns Resolves when all scheduled updates succeed or are skipped.
+ * @throws After all scheduled writes settle, if any update failed.
  */
 export async function updateContacts(
   url: string,
@@ -73,7 +76,10 @@ export async function updateContacts(
     );
   }
 
-  await Promise.allSettled(updatePromises);
+  // Settle every photo write before birthday synchronization fetches fresh contact snapshots.
+  const results = await Promise.allSettled(updatePromises);
+  const errors = results.filter((result) => result.status === "rejected");
+  if (errors.length) throw new AggregateError(errors.map((result) => result.reason), "Contact photo writes failed.");
   consola.success("All contact updates have been completed.");
 }
 

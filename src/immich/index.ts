@@ -1,8 +1,8 @@
-import { getAllPeople, getPersonThumbnail, init } from "@immich/sdk";
+import { getAllPeople, getPersonThumbnail } from "@immich/sdk";
 import { ImmichPerson } from "../types";
 import consola from "consola";
 
-let isSdkInitialized = false;
+import { immichRequest } from "./request";
 
 /**
  * Fetches all people from the Immich API, handling pagination.
@@ -11,7 +11,7 @@ let isSdkInitialized = false;
  * @param baseUrl - The base URL for the Immich API.
  * @param apiKey - The API key for authentication with Immich.
  * @returns A Promise that resolves to an array of ImmichPerson objects.
- * @throws {Error} If the API call fails or initialization was not done.
+ * @throws {Error} If connection options are missing or a people request fails.
  */
 export async function getImmichPeople(
   baseUrl: string,
@@ -28,10 +28,11 @@ export async function getImmichPeople(
 
   try {
     do {
+      // Scope every page request to this account rather than changing shared SDK defaults.
       currentPeoplePage = await getAllPeople({
         withHidden: false,
         page: currentPageNumber,
-      });
+      }, immichRequest(baseUrl, apiKey));
       consola.info(
         `Fetched Immich people page ${currentPageNumber} with ${currentPeoplePage.people.length}/${currentPeoplePage.total} people.`
       );
@@ -42,6 +43,7 @@ export async function getImmichPeople(
           id: person.id,
           name: person.name,
           preview: person.thumbnailPath,
+          birthDate: person.birthDate,
         }));
 
       allImmichPeople.push(...mappedPeople);
@@ -61,14 +63,14 @@ export async function getImmichPeople(
 /**
  * Fetches thumbnails for a given list of Immich person IDs in parallel.
  *
- * Pre-requisite: `initializeImmichSdk` must have been called beforehand.
+ * Credentials are scoped to each request, including concurrent configurations.
  *
  * @param baseUrl - The base URL for the Immich API.
  * @param apiKey - The API key for authentication with Immich.
  * @param ids - An array of Immich person IDs for which to fetch thumbnails.
  * @returns A Promise that resolves to an object mapping person ID to Blob thumbnail data.
  * If a thumbnail fetch fails for an ID, that ID might be missing from the returned object.
- * @throws {Error} If any parallel API call for a thumbnail fails critically.
+ * @throws {Error} If connection options are missing; individual download errors are logged and skipped.
  */
 export async function getPersonImages(
   baseUrl: string,
@@ -84,7 +86,7 @@ export async function getPersonImages(
     fetchPromises.push(
       (async () => {
         try {
-          thumbnails[id] = await getPersonThumbnail({ id });
+          thumbnails[id] = await getPersonThumbnail({ id }, immichRequest(baseUrl, apiKey));
         } catch (error) {
           consola.error(
             `Error fetching thumbnail for Immich person ID: ${id}:`,
@@ -106,24 +108,9 @@ export async function getPersonImages(
 }
 
 /**
- * Initializes the Immich SDK. This function should be called once before
- * making any calls to Immich API functions (getAllPeople, getPersonThumbnail, etc.).
- *
- * @param baseUrl - The base URL for the Immich API.
- * @param apiKey - The API key for authentication with Immich.
- * @throws {Error} If baseUrl or apiKey are missing.
+ * Validate connection options without changing global SDK defaults.
+ * The legacy function name is retained; authentication is supplied per request via immichRequest.
  */
 export function initializeImmichSdk(baseUrl: string, apiKey: string): void {
-  if (!baseUrl) {
-    throw new Error("Immich base URL cannot be empty for SDK initialization.");
-  }
-  if (!apiKey) {
-    consola.warn("Immich API Key is not provided. API calls might fail.");
-  }
-
-  if (!isSdkInitialized) {
-    init({ baseUrl, apiKey });
-    isSdkInitialized = true;
-    consola.info("Immich SDK initialized successfully.");
-  }
+  immichRequest(baseUrl, apiKey);
 }

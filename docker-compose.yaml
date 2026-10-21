@@ -2,7 +2,14 @@ services:
   immich-carddav-bridge:
     container_name: immich-carddav-bridge
     build: .
+    # Copy .env.example to .env and config.example.json to config.json.
+    # CONFIG_FILE selects JSON mode; leave it empty for single-account env mode.
     env_file: ".env"
     restart: unless-stopped
     volumes:
       - ./config.json:/app/config.json:ro
+      # Keep birthday baselines across container recreations.
+      - birthday-state:/app/.bridge-state
+
+volumes:
+  birthday-state:

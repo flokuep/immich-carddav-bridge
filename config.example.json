@@ -1,0 +1,16 @@
+[
+  {
+    "immichUrl": "https://immich.example.com/api",
+    "immichKey": "REPLACE_WITH_IMMICH_API_KEY",
+    "carddavUrl": "https://carddav.example.com",
+    "carddavPathTemplate": "/addressbooks/$CARDDAV_USERNAME/",
+    "carddavUsername": "REPLACE_WITH_CARDDAV_USERNAME",
+    "carddavPassword": "REPLACE_WITH_CARDDAV_PASSWORD_OR_TOKEN",
+    "carddavAddressbooks": [
+      "contacts"
+    ],
+    "birthdaySync": "bidirectional",
+    "birthdayStateFile": "/app/.bridge-state/birthdays.json",
+    "skipPhotos": false
+  }
+]
